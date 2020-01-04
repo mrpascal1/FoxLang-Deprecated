@@ -293,6 +293,8 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
 
         switch (expr.operator.type){
 
+            case COMMA:
+                return right;
             case GREATER:
                 checkNumberOperands(expr.operator, left, right);
                 return (double)left > (double)right;
@@ -312,8 +314,8 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
                 if (left instanceof Double && right instanceof Double) {
                     return (double)left + (double)right;
                 }
-                if (left instanceof String && right instanceof String){
-                    return (String)left + (String)right;
+                if (left instanceof String || right instanceof String){
+                    return stringify(left) + stringify(right);
                 }
                 throw new RuntimeError(expr.operator, "Operands must be two numbers or two strings.");
             case SLASH:
@@ -326,6 +328,21 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
             case EQUAL_EQUAL: return isEqual(left, right);
         }
 
+        return null;
+    }
+
+    @Override
+    public Object visitTernaryExpr(Expr.Ternary expr) {
+        Object left = evaluate(expr.left);
+        Object middle = evaluate(expr.middle);
+        Object right = evaluate(expr.right);
+
+        if (expr.leftOper.type == TokenType.QUESTION && expr.rightOper.type == TokenType.COLON){
+            if (isTruthy(left)){
+                return middle;
+            }
+            return right;
+        }
         return null;
     }
 

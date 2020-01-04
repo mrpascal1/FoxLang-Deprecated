@@ -25,6 +25,7 @@ public class GenerateAst {
            "Super       :   Token keyword, Token method",
            "This        :   Token keyword",
            "Unary       :   Token operator, Expr right",
+           "Ternary     :   Expr left, Token leftOper, Expr middle, Token rightOper, Expr right",
            "Variable    :   Token name"
         ));
 

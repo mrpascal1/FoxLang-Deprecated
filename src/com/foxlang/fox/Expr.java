@@ -15,6 +15,7 @@ abstract class Expr {
     R visitSuperExpr(Super expr);
     R visitThisExpr(This expr);
     R visitUnaryExpr(Unary expr);
+    R visitTernaryExpr(Ternary expr);
     R visitVariableExpr(Variable expr);
     }
     static class Assign extends Expr {
@@ -160,6 +161,25 @@ abstract class Expr {
     }
 
         final Token operator;
+        final Expr right;
+    }
+    static class Ternary extends Expr {
+        Ternary(Expr left, Token leftOper, Expr middle, Token rightOper, Expr right) {
+        this.left = left;
+        this.leftOper = leftOper;
+        this.middle = middle;
+        this.rightOper = rightOper;
+        this.right = right;
+    }
+
+    <R> R accept(Visitor<R> visitor) {
+        return visitor.visitTernaryExpr(this);
+    }
+
+        final Expr left;
+        final Token leftOper;
+        final Expr middle;
+        final Token rightOper;
         final Expr right;
     }
     static class Variable extends Expr {

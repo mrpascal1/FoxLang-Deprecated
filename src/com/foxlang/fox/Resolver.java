@@ -233,6 +233,14 @@ public class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void>{
         return null;
     }
 
+    @Override
+    public Void visitTernaryExpr(Expr.Ternary expr) {
+        resolve(expr.left);
+        resolve(expr.middle);
+        resolve(expr.right);
+        return null;
+    }
+
     private void resolve(Stmt stmt){
         stmt.accept(this);
     }

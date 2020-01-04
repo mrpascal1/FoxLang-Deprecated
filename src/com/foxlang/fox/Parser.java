@@ -24,7 +24,7 @@ public class Parser {
     }
 
     private Expr expression(){
-        return assignment();
+        return comma();
     }
 
     private Stmt declaration(){
@@ -200,8 +200,19 @@ public class Parser {
         return statements;
     }
 
+    //TODO:Test feature , Will be implemented after completion of the book
+    private Expr comma(){
+        Expr expr = assignment();
+        while (match(COMMA)){
+            Token comma = previous();
+            Expr right = equality();
+            expr = new Expr.Binary(expr, comma, right);
+        }
+        return expr;
+    }
+
     private Expr assignment(){
-        Expr expr = or();
+        Expr expr = ternary();
 
         if (match(EQUAL)){
             Token equals = previous();
@@ -218,6 +229,28 @@ public class Parser {
             error(equals, "Invalid assignment target.");
         }
 
+        return expr;
+    }
+
+    private Expr ternary(){
+        // Get the left expression
+        Expr expr = or();
+
+        // Is the '?' operator found?
+        if (match(QUESTION)){
+            //If so, we must be parsing a ternary expression.
+            Token leftOper = previous();
+            Expr middle = or();
+            if (match(COLON)){
+                Token rightOper = previous();
+
+                Expr right = ternary();
+
+                expr = new Expr.Ternary(expr, leftOper, middle, rightOper, right);
+            }else {
+                throw error(peek(), "Expected ':' after ternary operator '?'.");
+            }
+        }
         return expr;
     }
 
@@ -244,19 +277,6 @@ public class Parser {
 
         return expr;
     }
-
-    //TODO:Test feature , Will be implemented after completion of the book
-    /*private Expr comma(){
-        Expr expr = equality();
-
-        while (match(COMMA)){
-            Token operator = previous();
-            Expr right = equality();
-            expr = new Expr.Binary(expr, operator, right);
-        }
-
-        return expr;
-    }*/
 
     private Expr equality(){
         Expr expr = comparison();
@@ -320,10 +340,10 @@ public class Parser {
         List<Expr> arguments = new ArrayList<>();
         if (!check(RIGHT_PAREN)){
             do {
-                if (arguments.size() >= 255){
-                    error(peek(), "Cannot have more than 255 arguments.");
+                if (arguments.size() >= 8){
+                    error(peek(), "Cannot have more than 8 arguments.");
                 }
-                arguments.add(expression());
+                arguments.add(assignment());
             } while (match(COMMA));
         }
         Token paren = consume(RIGHT_PAREN, "Expect ')' after arguments.");

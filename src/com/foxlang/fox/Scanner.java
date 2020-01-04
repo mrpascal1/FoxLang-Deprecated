@@ -63,6 +63,8 @@ class Scanner {
             case '+': addToken(PLUS); break;
             case ';': addToken(SEMICOLON); break;
             case '*': addToken(STAR); break;
+            case '?': addToken(QUESTION); break;
+            case ':': addToken(COLON); break;
             case '!': addToken(match('=') ? BANG_EQUAL : BANG); break;
             case '=': addToken(match('=') ? EQUAL_EQUAL : EQUAL); break;
             case '<': addToken(match('=') ? LESS_EQUAL : LESS); break;
@@ -92,7 +94,7 @@ class Scanner {
                 }else {
                     Fox.error(line, "Unexpected character.");
                 }
-            break;
+                break;
         }
     }
 
@@ -118,40 +120,51 @@ class Scanner {
     }
 
     private void string(){
-        while (peek() != '"' && !isAtEnd()){
-            if (peek() == '\n') line++;
-            advance();
-        }
-        //Unterminated string.
-        if (isAtEnd()){
-            Fox.error(line, "Unterminated string.");
-        }
-        //The closing.
-        advance();
+        try {
+            while (peek() != '"' && !isAtEnd()) {
+                if (peek() == '\n') line++;
+                advance();
+            }
 
-        String value = source.substring(start + 1, current - 1);
-        addToken(STRING, value);
+            //Unterminated string.
+
+            if (isAtEnd()){
+                Fox.error(line, "Unterminated string.");
+            }
+            //The closing.
+
+            advance();
+
+            String value = source.substring(start + 1, current - 1);
+            addToken(STRING, value);
+        }catch (StringIndexOutOfBoundsException e){
+
+        }
     }
 
     //Experimental feature *Starts here*
     private void character(){
-        while (peek() != '\'' && !isAtEnd()){
-            if (peek() == '\n') line++;
+        try {
+            while (peek() != '\'' && !isAtEnd()) {
+                if (peek() == '\n') line++;
+                advance();
+            }
+            if (isAtEnd()) {
+                Fox.error(line, "Unterminated Character.");
+            }
             advance();
-        }
-        if (isAtEnd()){
-            Fox.error(line, "Unterminated Character.");
-        }
-        advance();
 
-        String value = source.substring(start + 1, current - 1);
-        addToken(CHARACTER, value);
+            String value = source.substring(start + 1, current - 1);
+            addToken(CHARACTER, value);
+        }catch (StringIndexOutOfBoundsException e){
+
+        }
+
     }// Ends here
 
     private boolean match(char expected){
         if (isAtEnd()) return false;
         if (source.charAt(current) != expected) return false;
-
         current++;
         return true;
     }
